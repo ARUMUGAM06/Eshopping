@@ -21,7 +21,7 @@ public class ProductService implements IProductService {
 	private final CategoryRepository categoryRepository;
 
 	@Override
-	public void addProduct(AddProduct product) {
+	public Product addProduct(AddProduct product) {
 		try {
 			Category category = Optional.ofNullable(categoryRepository
 							.findByName(product.getCategory().getName()))
@@ -30,7 +30,7 @@ public class ProductService implements IProductService {
 								return categoryRepository.save(newCategory);
 							});
 			product.setCategory(category);
-			productRepository.save(createProduct(product,category));
+			return productRepository.save(createProduct(product,category));
 		}catch(Exception e) {
 			throw new ResourceNotSavedException("Product not saved successfully!..");
 		}
@@ -47,10 +47,10 @@ public class ProductService implements IProductService {
 				);
 	}
 	@Override
-	public void updateProduct(Product product, int id) {
-		productRepository.findById(id)
-				.ifPresentOrElse(productRepository::save,
-				()->{throw new ResourceNotFoundException("Product Not Found!..");});
+	public Product updateProduct(Product product, int id) {
+		Product existingProduct= productRepository.findById(id)
+								.orElseThrow(()-> new ResourceNotFoundException("Product Not Found!..") );
+		return productRepository.save(existingProduct);
 	}
 
 	@Override
@@ -79,7 +79,8 @@ public class ProductService implements IProductService {
 		List<Product> products=productRepository.findByName(name);
 		if(products.isEmpty()) {
 			throw new ResourceNotFoundException("No Products Found!..");
-		}return products;
+		}
+		return products;
 	}
 
 	@Override
@@ -87,43 +88,44 @@ public class ProductService implements IProductService {
 		List<Product> products=productRepository.findByCategoryName(category);
 		if(products.isEmpty()) {
 			throw new ResourceNotFoundException("No Products Found!..");
-		}return products;
+		}
+		return products;
 	}
 
 	@Override
 	public List<Product> getProductsByBrand(String brand) {
-		try {
-			return productRepository.findByBrand(brand);
-		}catch(Exception e){
+		List<Product> products=productRepository.findByBrand(brand);
+		if(products.isEmpty()){
 			throw new ResourceNotFoundException("No Products Found!..");
 		}
+		return products;
 	}
 
 	@Override
 	public List<Product> getProductsByBrandAndCategoryName(String brand, String category) {
-		try {
-			return productRepository.findByBrandAndCategoryName(brand, category);
-		}catch(Exception e){
+		List<Product> products=productRepository.findByBrandAndCategoryName(brand,category);
+		if(products.isEmpty()) {
 			throw new ResourceNotFoundException("No Products Found!..");
 		}
+		return products;
 	}
 
 	@Override
 	public List<Product> getProductsByBrandAndName(String brand, String name) {
-		try {
-			return productRepository.findByBrandAndName(brand, name);
-		}catch(Exception e){
+		List<Product> products = productRepository.findByBrandAndName(brand,name);
+		if(products.isEmpty()) {
 			throw new ResourceNotFoundException("No Products Found!..");
 		}
+		return products;
 	}
 
 	@Override
 	public Long countProductsByBrandAndName(String brand, String name) {
-		try {
-			return productRepository.countByBrandAndName(brand, name);
-		}catch(Exception e){
-			throw new ResourceNotFoundException("No Products Found!..");
+		Long count=productRepository.countByBrandAndName(brand,name);
+		if(count==0) {
+			throw new ResourceNotFoundException("This "+brand + name +" contains no products");
 		}
+		return count;
 	}
 
 }

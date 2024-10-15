@@ -1,24 +1,30 @@
 package com.eshopping.cart.exception;
 
-import org.springframework.http.HttpStatus;
+import com.eshopping.cart.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @ControllerAdvice
 public class GlobalControllerAdvice {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleProductNotFound(ResourceNotFoundException ex){
-        return new ResponseEntity<>("Error: "+ex.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<ApiResponse> handleProductNotFound(ResourceNotFoundException ex){
+        return ResponseEntity.status(NOT_FOUND).body(new ApiResponse(ex.getMessage(),NOT_FOUND));
     }
 
     @ExceptionHandler(ResourceNotSavedException.class)
-    public ResponseEntity<String> handleNotSavedException(ResourceNotSavedException ex){
-        return new ResponseEntity<>("Error: "+ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponse> handleNotSavedException(ResourceNotSavedException ex){
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(ex.getMessage(),INTERNAL_SERVER_ERROR));
     }
 
-    public ResponseEntity<String> handleException(Exception ex){
-        return new ResponseEntity<>("Error: An unexpected Error occurred!.."+ex.getMessage(), HttpStatus.BAD_GATEWAY);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handleException(Exception ex){
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse("An unexpected Error occurred!. "+ex.getMessage(), INTERNAL_SERVER_ERROR));
     }
 }

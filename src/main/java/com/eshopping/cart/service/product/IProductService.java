@@ -5,8 +5,8 @@ import com.eshopping.cart.model.AddProduct;
 import com.eshopping.cart.model.Product;
 
 public interface IProductService {
-	void addProduct(AddProduct product);
-	void updateProduct(Product product,int id);
+	Product addProduct(AddProduct product);
+	Product updateProduct(Product product,int id);
 	void deleteProductById(int id);
 	Product getProductById(int id);
 	List<Product> getAllProducts();
